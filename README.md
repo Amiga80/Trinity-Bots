@@ -1,10 +1,10 @@
 ### This mod was last updated:
-### last version: 07 Sep 2020, TrinityCore revision: [68a4085427](https://github.com/TrinityCore/TrinityCore/commit/68a4085427)
+### last version: 23 Dec 2020, TrinityCore revision: [9ae23ef2fd](https://github.com/TrinityCore/TrinityCore/commit/9ae23ef2fd)
 ### 2013 version: 12 Dec 2013. TrinityCore revision: [385e2dba37](https://github.com/TrinityCore/TrinityCore/commit/385e2dba37)
 
 # [ THE NPCBOTS MANUAL ]
 >Compiled by: Trickerer (onlysuffering @ Gmail dot Com)  
->Version 0.10 - 16 Jun 2020  
+>Version 0.12 - 06 Jan 2021  
 >Original version by: Thesawolf (@ Gmail dot Com) Version 0.3 - 20 July 2016 [here](https://github.com/thesawolf/TrinityCore/blob/TrinityCoreLegacy/README_Bots.md)
 
 ---------------------------------------
@@ -26,6 +26,7 @@
             - [Raid Group Frames](#raid-group-frames)
         - [NPCBot Extras](#npcbot-extras)
     - [NPCBot Config Settings](#npcbot-config-settings)
+    - [NPCBot Mod Localization](#npcbot-mod-localization)
     - [NPCBot Extra Classes](#npcbot-extra-classes)
     - [NPCBot Occupations](#npcbot-occupations)
 3. [Guide Changelog](#guide-changelog)
@@ -129,6 +130,12 @@ _TARGET_ indicates that command is used on a selected unit
         - `.npcbot spawn 70001` (spawns NPCBot with ID 70001)  
         - `.npcb sp 70002` (spawn NPCBot with ID 70002)  
         - `.npcb sp [Haromm]` (spawn NPCBot by link)  
+- **`move <ENTRY|LINK|_TARGET_>`** -- (GM command) moves spawned NPCBot to a new location. This command replaces `.npc move` command for bots  
+    - <ENTRY> = ID of NPCBot  
+    - <LINK> = creature_template link added by Shift-click (obtained from lookup list)  
+    - _TARGET_ = selected NPCBot  
+    **Example Usage**:  
+        - `.npcbot move 70001` (spawns NPCBot with ID 70001)  
 - **`delete _TARGET_`** -- (GM command) deletes NPCBot from world, NPCBot is removed from owner if any and deleted from DB  
     - _TARGET_ = selected NPCBot  
     **Example Usage**:  
@@ -143,7 +150,7 @@ _TARGET_ indicates that command is used on a selected unit
         - factionID = ID from FactionTemplate.dbc (experts only). It's NOT what you get by using `.lookup faction` command  
         - _TARGET_ = selected NPCBot  
         **Example Usage:**  
-            - `.npcbot set faction` (by itself will displays list of subcommands for faction)  
+            - `.npcbot set faction` (by itself will display list of subcommands for faction)  
             - `.npcb s f m` (sets the faction of a selected NPCBot to HostileToAll)  
     - **`owner <GUID|NAME> _TARGET_`** -- sets ownership of a selected NPCBot to a specific player  
         - GUID = player DB guid  
@@ -167,7 +174,7 @@ _TARGET_ indicates that command is used on a selected unit
     - (No arguments)  
     **Example Usage:**  
         - `.npcbot reloadconfig  
-- **`command <COMMAND> _TARGET_`** -- (Player command) allows you to manage your NPCBots positioning (by itself will displays list of subcommands)  
+- **`command <COMMAND> _TARGET_`** -- (Player command) allows you to manage your NPCBots positioning (by itself will display list of subcommands)  
     - COMMAND = command string  
         - follow, f = FOLLOW mode  
         - standstill, stand = STAY mode  
@@ -205,6 +212,24 @@ _TARGET_ indicates that command is used on a selected unit
     **Example Usage:**  
         - `.npcbot kill`  
         - `.npcbot suicide`  
+- **`order`** -- (Player command) allows you to issue an order to your NPCBot. Orders take priority over any other action. Each bot can have up to 3 queued orders at a time (by itself will display list of subcommands)  
+    - **`cast <BOT_NAME> <SPELL_NAME> _TARGET_TOKEN_`** -- cast some spell  
+        - BOT_NAME = your bot name in client's locale. Case insensitive  
+        - SPELL_NAME = spell name in client's locale. All_spaces_must_be_replaced_with_underscores. Case insensitive  
+        - _TARGET_TOKEN_ = optional target identifier string. If left empty bot will target self. Case insensitive. Possible values:  
+            - `bot`, `self` = selfcast  
+            - `me`, `master` = bot owner (you)  
+            - `target` = bot's current target (won't work if bot has no target)  
+            - `mytarget` = your current target (won't work if you have no target)  
+    **Example Usage:**  
+        - `.npcbot order cast javad lesser_healing_wave me`  
+        - `.npcbot order cast javad purge mytarget`  
+- **`distance _ATTACK_ <VALUE>`** -- (Player command) allows you to quickly set bot follow / attack distance (by itself will display full help)  
+    - _ATTACK_ = if skipped you set follow distance (default), if set to `"attack"` you set attack distance  
+    - VALUE = desired value for chosen distance type (within standard distance ranges)  
+    **Example Usage:**  
+        - `.npcbot distance 75`  
+        - `.npcbot distance attack 20`  
 
 ### NPCBot Control and Usage
 #### NPCBot Getting started
@@ -380,7 +405,8 @@ NPCBot Role management allows you to adjust how they operate overall. The availa
 To adjust the NPCBot's roles, you need to right-click that NPCBot and choose `_Manage roles..._` from their Gossip Menu. You should then see (dependent upon the class):
 ```
 - Gathering...
-- Tanking
+- Looting...
+- Tank
 - DPS
 - Heal
 - Ranged
@@ -402,6 +428,8 @@ _Example_: Warrior having Tanking + DPS + Ranged role enabled will constantly tr
 It's recommended to only enable 1 or 2 specific roles for that class to minimize them switching tactics around alot. The only exception is Priest which can handle DPS, Heal and Ranged roles just fine (they will preserve some mana for healing and resort to wand)
 
 Gathering roles allows NPCBots to collect different ores, herbs, leather and other trade goods. It does NOT allow to track those goods so good luck with that. It also does NOT allow bots to craft anything. NPCBots have their skill assigned according to their level so level 1 NPCBot for example will not be able to mine Mithril
+
+Looting roles allows NPCBots to automatically and quickly collect items from nearby lootable creatures for you and other players in your group. Make sure to chose loot method, quality threshold in your group and looting setting for your looter bot.
 
 #### NPCBot Formation
 Some times you just want your NPCBot close.. or as far away as possible. The formation option allows you to adjust your NPCBot's distance from you.
@@ -437,7 +465,7 @@ Selecting `_Manage abilities..._` from the Gossip menu will give you a listing o
 If spell is not listed this doesn't mean NPCBot does not have the spell, probably you just cannot use it manually.  
 NPCBots' abilities check algorithm includes finding missing buffs, friends to heal, restocking on consumables (like healthstones), class enchants (Rogue, Shaman), utilities (like using Sprint if falling far behind), spells for party and self, self-heals, finding crowd control targets and finally, attack abilities
 
-Using `_Manage allowed abilities..._` submenu you can make bots not use some of their spells (note though that due to technical restrictions full spell list cannot be displayed so not ANY spell can be disabled)
+Using `_Manage allowed abilities..._` submenu you can make bots not use some of their spells. Disabled spells list is saved in DB
 
 #### NPCBot Talents
 NPCBots don't use normal talent pick choice system. Instead, main talent tree is used (according to a spec) while also picking vital talents from other two trees up to tier 3 (available to players of the same spec).  
@@ -550,6 +578,9 @@ If some config settings look ambiguous to you, this section may help you
 - **`NpcBot.EquipmentDisplay.Enable`**
     - This parameter allows bots to display equipped items other than weapons on their model  
     Explanation. Normally, for creatures game client only draws default model determined by model ID. This parameter force feeds clients information about unit model and items in equipment slots which is generated at server side; so instead of default model client draws player model components including skin color, face, facial hair and others including "equipped" items. The only problem players may encounter comes from a game client bug which can cause a crash at game exit (client crash, not server crash) with error \#132. This bug can be reproduced by changing base model of unit having UNIT_FLAG2_MIRROR_IMAGE more than 4 times in a short period of time, so bots being polymorphed or druids shapeshifting have higher chance of causing this problem
+
+### NPCBot Mod Localization
+All localizable string are contained in `npc_text` table. If you want to make a translation you'll have to populate `npc_text_locale` table accordingly (`Text0_0` field)  
 
 ### NPCBot Extra Classes
 #### General Information
@@ -696,6 +727,10 @@ Bots are being added to world at server loading (after Map System is started)
 ---------------------------------------
 ## Guide Changelog
 
+- **Version 0.12** (_06 Jan 2021_)
+    - Added info on autoloot
+- **Version 0.11** (_07 Nov 2020_)
+    - Added info on localization
 - **Version 0.10** (_16 Jun 2020_)
     - Added info on new config settings
 - **Version 0.9** (_09 Jun 2020_)
